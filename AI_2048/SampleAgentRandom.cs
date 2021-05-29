@@ -200,12 +200,12 @@ public class MainSolver : SolveAgent
     //-------------------------
     public double Evaluation(GameField field)
     {
-        double[,] squere_weight = {
-            {1, 2, 3, 4},
-            {2, 3, 4, 5},
-            {3, 4, 5, 6},
-            {4, 5, 6, 7}
-        };
+        //double[,] squere_weight = {
+        //    {1, 2, 3, 4},
+        //    {2, 3, 4, 5},
+        //    {3, 4, 5, 6},
+        //    {4, 5, 6, 7}
+        //};
         double E = 0;
         double NextPiece = 0;
         for (int i=0; i<4; i++)
@@ -215,7 +215,7 @@ public class MainSolver : SolveAgent
                 Tuple<int, int> P = new Tuple<int, int>(i, j);
                 //E += field[P] * squere_weight[i, j];
                 //E += Math.Pow(field[P], 2);
-                E += field[P] * 2;
+                E += field[P] * 5;
                 //隣接するマスの値の差の合計求める
                 if (field[P] != 0)
                 {
