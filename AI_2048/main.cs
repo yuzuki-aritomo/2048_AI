@@ -16,5 +16,6 @@ public static class Program
         GameController cont = new GameController(fieldsize, rand_seed);
 
         cont.Run(typeof(MainSolver), log_path: log_path);
+
     }
 }
