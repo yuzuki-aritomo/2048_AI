@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class RandomPlacer : PlaceAgent
 {
@@ -61,21 +63,25 @@ public class MainSolver : SolveAgent
         {
             GameField field_R = new GameField(field);
             Right = AplphaBetaSerch(field_R.slide("Right"), 1, 0, PlusInf);
+            //Right = DepthFirstSearch(field_R.slide("Right"), 1);
         }
         if (field.isValidSlide("Left"))
         {
             GameField field_L = new GameField(field);
             Left = AplphaBetaSerch(field_L.slide("Left"), 1, 0, PlusInf);
+            //Left = DepthFirstSearch(field_L.slide("Left"), 1);
         }
         if (field.isValidSlide("Up"))
         {
             GameField field_U = new GameField(field);
             Up = AplphaBetaSerch(field_U.slide("Up"), 1, 0, PlusInf);
+            //Up = DepthFirstSearch(field_U.slide("Up"), 1);
         }
         if (field.isValidSlide("Down"))
         {
             GameField field_D = new GameField(field);
             Down = AplphaBetaSerch(field_D.slide("Down"), 1, 0, PlusInf);
+            //Down = DepthFirstSearch(field_D.slide("Down"), 1);
         }
         Console.WriteLine("-----ï]âøíl------");
         Console.WriteLine("RightÅF{0}",Right);
@@ -90,14 +96,15 @@ public class MainSolver : SolveAgent
         if (Down >= Right && Down >= Up && Down >= Up) return "Down";
         return "Right";
     }
+
+
     //-------------------------
     //ê[Ç≥óDêÊíTçı max-miníTçı alpha-betaíTçı
     //-------------------------
     public double AplphaBetaSerch(GameField field, int deep, double maxEvaluation, double minEvaluation)//0 , ñ≥å¿
     {
-        if (deep == 4)
+        if (deep == 5)
         {
-            //Console.WriteLine(Evaluation(field));
             return Evaluation(field);
         }
         //ê[ìxÇÃí«â¡
@@ -199,9 +206,9 @@ public class MainSolver : SolveAgent
     //-------------------------
     //ê[Ç≥óDêÊíTçı ëSíTçı ïΩãœÇ∆ç≈ëÂíl
     //-------------------------
-    public int DepthFirstSearch(GameField field, int deep)
+    public double DepthFirstSearch(GameField field, int deep)
     {
-        if(deep == 8)
+        if(deep == 5)
         {
             return Evaluation(field);
         }
@@ -214,7 +221,7 @@ public class MainSolver : SolveAgent
 
         //4å¬ÉâÉìÉ_ÉÄÇ≈ïàñ íuÇ≠ÅAàÍìxÇæÇØ4, ÇªÇÍà»äOÇÕ2
         int Up = 0;
-        int Evaluation_Up = 0;
+        double Evaluation_Up = double.PositiveInfinity;
         if (fieldUp.isValidSlide("Up"))
         { 
             fieldUp.slide("Up");
@@ -222,13 +229,21 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Up += DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 4), deep);
-                else Up +=  DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 2), deep);
+                if (R > 7) Evaluation_Up = Math.Min(Evaluation_Up, DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 4), deep));
+                else Evaluation_Up = Math.Min(Evaluation_Up, DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 2), deep));
             }
-            if( L.Count != 0 ) Evaluation_Up = Up / L.Count;
+            if (Evaluation_Up == double.PositiveInfinity)
+            {
+                Console.WriteLine("###############");
+            }
+            //if( L.Count != 0 ) Evaluation_Up = Up / L.Count;
+        }
+        else
+        {
+            Evaluation_Up = 0;
         }
         int Down = 0;
-        int Evaluation_Down = 0;
+        double Evaluation_Down = double.PositiveInfinity;
         if (fieldDown.isValidSlide("Down"))
         {
             fieldDown.slide("Down");
@@ -236,13 +251,18 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Down += DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 4), deep);
-                else Down += DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 2), deep);
+                if (R > 7) Evaluation_Down = Math.Min(Evaluation_Down, DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 4), deep));
+                else Evaluation_Down = Math.Min(Evaluation_Down, DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 2), deep));
             }
-            if (L.Count != 0) Evaluation_Down = Down / L.Count;
+            //if (L.Count != 0) Evaluation_Down = Down / L.Count;
         }
+        else
+        {
+            Evaluation_Down = 0;
+        }
+
         int Right = 0;
-        int Evaluation_Right = 0;
+        double Evaluation_Right = double.PositiveInfinity;
         if (fieldRight.isValidSlide("Right"))
         {
             fieldRight.slide("Right");
@@ -250,13 +270,18 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Right += DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 4), deep);
-                else Right += DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 2), deep);
+                if (R > 7) Evaluation_Right = Math.Min(Evaluation_Right, DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 4), deep));
+                else Evaluation_Right = Math.Min(Evaluation_Right, DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 2), deep));
             }
-            if (L.Count != 0) Evaluation_Right = Right / L.Count;
+            //if (L.Count != 0) Evaluation_Right = Right / L.Count;
         }
+        else
+        {
+            Evaluation_Right = 0;
+        }
+
         int Left = 0;
-        int Evaluation_Left = 0;
+        double Evaluation_Left = double.PositiveInfinity;
         if (fieldLeft.isValidSlide("Left"))
         {
             fieldLeft.slide("Left");
@@ -264,13 +289,22 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Left += DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 4), deep);
-                else Left += DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 2), deep);
+                if (R > 7) Evaluation_Left = Math.Min(Evaluation_Left, DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 4), deep));
+                else Evaluation_Left = Math.Min(Evaluation_Left, DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 2), deep));
             }
-            if (L.Count != 0) Evaluation_Left = Left / L.Count;
+            //if (L.Count != 0) Evaluation_Left = Left / L.Count;
+        }
+        else
+        {
+            Evaluation_Left = 0;
         }
         //if (n == 0) return 0;
         //4ï˚å¸ÇÃï]âøílÇÃïΩãœÇÃç≈ëÂílÇï‘Ç∑
+        if(Evaluation_Up == double.PositiveInfinity)
+        {
+            //Console.WriteLine("###############");
+        }
+
         return Math.Max(Math.Max(Evaluation_Up, Evaluation_Down), Math.Max(Evaluation_Right, Evaluation_Left));
     }
     //-------------------------
@@ -302,7 +336,7 @@ public class MainSolver : SolveAgent
     //-------------------------
     //ï]âøä÷êî---î’ñ Çï]âø
     //-------------------------
-    public int Evaluation(GameField field)
+    public double Evaluation(GameField field)
     {
         int E = 0;
         int NextPiece = 0;

@@ -14,19 +14,17 @@ public static class Program
         Tuple<int, int> fieldsize = new Tuple<int, int>(4, 4);
 
         GameController cont = new GameController(fieldsize, rand_seed);
-
+        int n = Tst(10);
         cont.Run(typeof(MainSolver), log_path: log_path);
     }
     public static int Tst(int n)
     {
-        for(int i = 0; i < 10; i++)
-        {
-            n += i;
-        }
-        for (int i = 0; i < 10; i++)
-        {
-            Console.WriteLine(n);
-        }
-        return n;
+        Console.WriteLine("n{0}", n);
+        int k = n;
+        k += 1;
+        Console.WriteLine("k{0}", k);
+        Console.WriteLine("n{0}", n);
+
+        return 0;
     }
 }
