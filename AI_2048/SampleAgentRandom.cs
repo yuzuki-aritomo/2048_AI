@@ -53,25 +53,29 @@ public class MainSolver : SolveAgent
         double Left = 0;
         double Up = 0;
         double Down = 0;
+
+        double PlusInf = double.PositiveInfinity;
+        double MinusInff = double.NegativeInfinity;
+
         if (field.isValidSlide("Right"))
         {
             GameField field_R = new GameField(field);
-            Right = DepthFirstSearch(field_R.slide("Right"), 1);
+            Right = AplphaBetaSerch(field_R.slide("Right"), 1, 0, PlusInf);
         }
         if (field.isValidSlide("Left"))
         {
             GameField field_L = new GameField(field);
-            Left = DepthFirstSearch(field_L.slide("Left"), 1);
+            Left = AplphaBetaSerch(field_L.slide("Left"), 1, 0, PlusInf);
         }
         if (field.isValidSlide("Up"))
         {
             GameField field_U = new GameField(field);
-            Up = DepthFirstSearch(field_U.slide("Up"), 1);
+            Up = AplphaBetaSerch(field_U.slide("Up"), 1, 0, PlusInf);
         }
         if (field.isValidSlide("Down"))
         {
             GameField field_D = new GameField(field);
-            Down = DepthFirstSearch(field_D.slide("Down"), 1);
+            Down = AplphaBetaSerch(field_D.slide("Down"), 1, 0, PlusInf);
         }
         Console.WriteLine("-----評価値------");
         Console.WriteLine("Right：{0}",Right);
@@ -87,17 +91,117 @@ public class MainSolver : SolveAgent
         return "Right";
     }
     //-------------------------
-    //深さ優先探索
+    //深さ優先探索 max-min探索 alpha-beta探索
     //-------------------------
-    public double DepthFirstSearch(GameField field, int deep)
+    public double AplphaBetaSerch(GameField field, int deep, double maxEvaluation, double minEvaluation)//0 , 無限
     {
-        //それぞれの方向の重み
-        double w_Right = 1;
-        double w_Left = 1;
-        double w_Up = 1;
-        double w_Down = 1;
-        List<double> scoreList = new List<double>();
-        if(deep == 5)
+        if (deep == 4)
+        {
+            //Console.WriteLine(Evaluation(field));
+            return Evaluation(field);
+        }
+        //深度の追加
+        deep++;
+        //4方向に動かした場合
+        GameField fieldUp = new GameField(field);
+        GameField fieldDown = new GameField(field);
+        GameField fieldRight = new GameField(field);
+        GameField fieldLeft = new GameField(field);
+
+        double minEvaluationUp = minEvaluation;
+        double minEvaluationDown = minEvaluation;
+        double minEvaluationRight = minEvaluation;
+        double minEvaluationLeft = minEvaluation;
+
+        //4個ランダムで譜面置く、一度だけ4, それ以外は2
+        //double Up = double.PositiveInfinity;
+        //double Evaluation_Up = double.PositiveInfinity;
+        if (fieldUp.isValidSlide("Up"))
+        {
+            fieldUp.slide("Up");
+            List<Tuple<int, int>> L = putPiece(fieldUp);
+            for (int i = 0; i < L.Count; i++)
+            {
+                int R = rand.Next(1, 10);
+                if (R > 7) minEvaluationUp = Math.Min(minEvaluationUp, AplphaBetaSerch(fieldUp.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationUp));
+                else minEvaluationUp = Math.Min(minEvaluationUp, AplphaBetaSerch(fieldUp.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationUp));
+                //ロスカット
+                if (maxEvaluation >= minEvaluationUp) break;
+            }
+            maxEvaluation = Math.Max(maxEvaluation, minEvaluationUp);
+        }
+        if(maxEvaluation >= minEvaluationUp)
+        {
+            return maxEvaluation;
+        }
+
+        //double Down = double.PositiveInfinity;
+        //double Evaluation_Down = double.PositiveInfinity;
+        if (fieldDown.isValidSlide("Down"))
+        {
+            fieldDown.slide("Down");
+            List<Tuple<int, int>> L = putPiece(fieldDown);
+            for (int i = 0; i < L.Count; i++)
+            {
+                int R = rand.Next(1, 10);
+                if (R > 7) minEvaluationDown = Math.Min(minEvaluationDown, AplphaBetaSerch(fieldDown.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationDown));
+                else minEvaluationDown = Math.Min(minEvaluationDown, AplphaBetaSerch(fieldDown.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationDown));
+                //ロスカット
+                if (maxEvaluation >= minEvaluationDown) break;
+            }
+            maxEvaluation = Math.Max(maxEvaluation, minEvaluationDown);
+        }
+        if (maxEvaluation >= minEvaluationDown)
+        {
+            return maxEvaluation;
+        }
+        //double Right = double.PositiveInfinity;
+        //double Evaluation_Right = double.PositiveInfinity;
+        if (fieldRight.isValidSlide("Right"))
+        {
+            fieldRight.slide("Right");
+            List<Tuple<int, int>> L = putPiece(fieldRight);
+            for (int i = 0; i < L.Count; i++)
+            {
+                int R = rand.Next(1, 10);
+                if (R > 7) minEvaluationRight = Math.Min(minEvaluationRight, AplphaBetaSerch(fieldRight.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationRight));
+                else minEvaluationRight = Math.Min(minEvaluationRight, AplphaBetaSerch(fieldRight.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationRight));
+                if (maxEvaluation <= minEvaluationRight) break;
+            }
+            maxEvaluation = Math.Max(maxEvaluation, minEvaluationRight);
+        }
+        if(maxEvaluation >= minEvaluationRight)
+        {
+            return maxEvaluation;
+        }
+        //double Left = 0;
+        //double Evaluation_Left = 0;
+        if (fieldLeft.isValidSlide("Left"))
+        {
+            fieldLeft.slide("Left");
+            List<Tuple<int, int>> L = putPiece(fieldLeft);
+            for (int i = 0; i < L.Count; i++)
+            {
+                int R = rand.Next(1, 10);
+                if (R > 7) minEvaluationLeft = Math.Min(minEvaluationLeft, AplphaBetaSerch(fieldLeft.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationLeft));
+                else minEvaluationLeft = Math.Min(minEvaluationLeft, AplphaBetaSerch(fieldLeft.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationLeft));
+                if (maxEvaluation <= minEvaluationLeft) break;
+            }
+            maxEvaluation = Math.Max(maxEvaluation, minEvaluationLeft);
+        }
+        if (maxEvaluation >= minEvaluationLeft)
+        {
+            return maxEvaluation;
+        }
+        //4方向の評価値の最大値を返す
+        return maxEvaluation;
+    }
+    //-------------------------
+    //深さ優先探索 全探索 平均と最大値
+    //-------------------------
+    public int DepthFirstSearch(GameField field, int deep)
+    {
+        if(deep == 8)
         {
             return Evaluation(field);
         }
@@ -109,8 +213,8 @@ public class MainSolver : SolveAgent
         GameField fieldLeft = new GameField(field);
 
         //4個ランダムで譜面置く、一度だけ4, それ以外は2
-        double Up = 0;
-        double Evaluation_Up = 0;
+        int Up = 0;
+        int Evaluation_Up = 0;
         if (fieldUp.isValidSlide("Up"))
         { 
             fieldUp.slide("Up");
@@ -118,13 +222,13 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Up += DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 4), deep) * w_Up;
-                else Up +=  DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 2), deep) * w_Up;
+                if (R > 7) Up += DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 4), deep);
+                else Up +=  DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 2), deep);
             }
             if( L.Count != 0 ) Evaluation_Up = Up / L.Count;
         }
-        double Down = 0;
-        double Evaluation_Down = 0;
+        int Down = 0;
+        int Evaluation_Down = 0;
         if (fieldDown.isValidSlide("Down"))
         {
             fieldDown.slide("Down");
@@ -132,13 +236,13 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Down += DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 4), deep) * w_Down;
-                else Down += DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 2), deep) * w_Down;
+                if (R > 7) Down += DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 4), deep);
+                else Down += DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 2), deep);
             }
             if (L.Count != 0) Evaluation_Down = Down / L.Count;
         }
-        double Right = 0;
-        double Evaluation_Right = 0;
+        int Right = 0;
+        int Evaluation_Right = 0;
         if (fieldRight.isValidSlide("Right"))
         {
             fieldRight.slide("Right");
@@ -146,13 +250,13 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Right += DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 4), deep) * w_Right;
-                else Right += DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 2), deep) * w_Right;
+                if (R > 7) Right += DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 4), deep);
+                else Right += DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 2), deep);
             }
             if (L.Count != 0) Evaluation_Right = Right / L.Count;
         }
-        double Left = 0;
-        double Evaluation_Left = 0;
+        int Left = 0;
+        int Evaluation_Left = 0;
         if (fieldLeft.isValidSlide("Left"))
         {
             fieldLeft.slide("Left");
@@ -160,8 +264,8 @@ public class MainSolver : SolveAgent
             for (int i = 0; i < L.Count; i++)
             {
                 int R = rand.Next(1, 10);
-                if (R > 7) Left += DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 4), deep) * w_Left;
-                else Left += DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 2), deep) * w_Left;
+                if (R > 7) Left += DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 4), deep);
+                else Left += DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 2), deep);
             }
             if (L.Count != 0) Evaluation_Left = Left / L.Count;
         }
@@ -192,30 +296,24 @@ public class MainSolver : SolveAgent
         else
         {
             List<Tuple<int, int>> M = L.OrderBy(i => Guid.NewGuid()).ToList();
-            return M.GetRange(0, 5);
+            return M.GetRange(0, 4);
         }
     }
     //-------------------------
     //評価関数---盤面を評価
     //-------------------------
-    public double Evaluation(GameField field)
+    public int Evaluation(GameField field)
     {
-        //double[,] squere_weight = {
-        //    {1, 2, 3, 4},
-        //    {2, 3, 4, 5},
-        //    {3, 4, 5, 6},
-        //    {4, 5, 6, 7}
-        //};
-        double E = 0;
-        double NextPiece = 0;
+        int E = 0;
+        int NextPiece = 0;
+        int NonePiece = 0;
         for (int i=0; i<4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
                 Tuple<int, int> P = new Tuple<int, int>(i, j);
-                //E += field[P] * squere_weight[i, j];
-                //E += Math.Pow(field[P], 2);
-                E += field[P] * 5;
+                E += (int)Math.Pow(field[P], 2);
+                //E += field[P] * 10;
                 //隣接するマスの値の差の合計求める
                 if (field[P] != 0)
                 {
@@ -239,6 +337,10 @@ public class MainSolver : SolveAgent
                             break;
                         }
                     }
+                }
+                else
+                {
+                    NonePiece++;
                 }
             }
         }

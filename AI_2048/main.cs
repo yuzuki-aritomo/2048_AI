@@ -16,6 +16,17 @@ public static class Program
         GameController cont = new GameController(fieldsize, rand_seed);
 
         cont.Run(typeof(MainSolver), log_path: log_path);
-
+    }
+    public static int Tst(int n)
+    {
+        for(int i = 0; i < 10; i++)
+        {
+            n += i;
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            Console.WriteLine(n);
+        }
+        return n;
     }
 }
