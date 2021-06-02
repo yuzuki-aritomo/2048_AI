@@ -14,47 +14,17 @@ public static class Program
         Tuple<int, int> fieldsize = new Tuple<int, int>(4, 4);
 
         GameController cont = new GameController(fieldsize, rand_seed);
-        GameController cont1 = new GameController(fieldsize, rand_seed);
-        GameController cont2 = new GameController(fieldsize, rand_seed);
-        GameController cont3 = new GameController(fieldsize, rand_seed);
-        GameController cont4 = new GameController(fieldsize, rand_seed);
-        GameController cont5 = new GameController(fieldsize, rand_seed);
-        GameController cont6 = new GameController(fieldsize, rand_seed);
+        int n = Tst(10);
+        cont.Run(typeof(MainSolver), log_path: log_path);
+    }
+    public static int Tst(int n)
+    {
+        Console.WriteLine("n{0}", n);
+        int k = n;
+        k += 1;
+        Console.WriteLine("k{0}", k);
+        Console.WriteLine("n{0}", n);
 
-        Thread thread = new Thread(new ThreadStart(() =>
-        {
-            cont.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        Thread thread1 = new Thread(new ThreadStart(() =>
-        {
-            cont1.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        Thread thread2 = new Thread(new ThreadStart(() =>
-        {
-            cont2.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        Thread thread3 = new Thread(new ThreadStart(() =>
-        {
-            cont3.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        Thread thread4 = new Thread(new ThreadStart(() =>
-        {
-            cont4.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        Thread thread5 = new Thread(new ThreadStart(() =>
-        {
-            cont5.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        Thread thread6 = new Thread(new ThreadStart(() =>
-        {
-            cont6.Run(typeof(MainSolver), log_path: log_path);
-        }));
-        thread.Start();
-        //thread1.Start();
-        //thread2.Start();
-        //thread3.Start();
-        //thread4.Start();
-        //thread5.Start();
-        //thread6.Start();
+        return 0;
     }
 }
