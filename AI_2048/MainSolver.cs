@@ -17,7 +17,9 @@ public class RandomPlacer : PlaceAgent
     }
 }
 
+//------------------
 //main関数
+//------------------
 public class MainSolver : SolveAgent
 {
     public MainSolver(Random random) : base(random) { }
@@ -29,7 +31,7 @@ public class MainSolver : SolveAgent
         GameField latest = history[history.Count - 1];
         GameField field =  new GameField(latest);
 
-        Console.WriteLine(Evaluation(field, "test"));
+        Console.WriteLine(Evaluation(field));
 
         String s = FindSlide(field);
         //4方向に移動可能かどうか判断
@@ -39,8 +41,6 @@ public class MainSolver : SolveAgent
         }
         else
         {
-            //File.AppendAllText(@"C:\Users\ngnls\Desktop\output.txt", latest.maxpiece.ToString() + "\n");
-            //return "end";
             if (latest.isValidSlide("Right"))
             {
                 return "Right";
@@ -73,33 +73,32 @@ public class MainSolver : SolveAgent
         {
             GameField field_R = new GameField(field);
             Right = AplphaBetaSerch(field_R.slide("Right"), 1, MinusInff, PlusInf);
-            //Right = DepthFirstSearch(field_R.slide("Right"), 1);
         }
         if (field.isValidSlide("Left"))
         {
             GameField field_L = new GameField(field);
             Left = AplphaBetaSerch(field_L.slide("Left"), 1, MinusInff, PlusInf);
-            //Left = DepthFirstSearch(field_L.slide("Left"), 1);
         }
         if (field.isValidSlide("Up"))
         {
             GameField field_U = new GameField(field);
             Up = AplphaBetaSerch(field_U.slide("Up"), 1, MinusInff, PlusInf);
-            //Up = DepthFirstSearch(field_U.slide("Up"), 1);
         }
         if (field.isValidSlide("Down"))
         {
             GameField field_D = new GameField(field);
             Down = AplphaBetaSerch(field_D.slide("Down"), 1, MinusInff, PlusInf);
-            //Down = DepthFirstSearch(field_D.slide("Down"), 1);
         }
-        Console.WriteLine("--------評価値------");
-        Console.WriteLine("Right：{0}",Right);
-        Console.WriteLine("Left：{0}",Left);
-        Console.WriteLine("Up：{0}", Up);
-        Console.WriteLine("Down：{0}", Down);
-        Console.WriteLine("---------------------");
-        //評価値が最大のものを返す
+
+        //評価値の出力
+        //Console.WriteLine("--------評価値------");
+        //Console.WriteLine("Right：{0}",Right);
+        //Console.WriteLine("Left：{0}",Left);
+        //Console.WriteLine("Up：{0}", Up);
+        //Console.WriteLine("Down：{0}", Down);
+        //Console.WriteLine("---------------------");
+        
+        //評価値が最大の方向を返す
         if (Right >= Left && Right >= Down && Right >= Up) return "Right";
         if (Left >= Right && Left >= Down && Left >= Up) return "Left";
         if (Up >= Right && Up >= Down && Up >= Left) return "Up";
@@ -109,15 +108,16 @@ public class MainSolver : SolveAgent
 
 
     //--------------------------------------
-    //深さ優先探索 minimax探索 alpha-beta探索
+    //深さ優先探索 minimax探索 alpha-beta
     //-------------------------------------
     public double AplphaBetaSerch(GameField field, int deep, double maxEvaluation, double minEvaluation)//0 , 無限
     {
+        //ゲームセットの時
         if (field.checkmate())
         {
             return double.NegativeInfinity;
         }
-        if (deep == 4)
+        if (deep == 5)
         {
             return Evaluation(field);
         }
@@ -141,7 +141,7 @@ public class MainSolver : SolveAgent
         {
             fieldUp.slide("Up");
             List<Tuple<int, int>> L = putPiece(fieldUp);
-            if (L.Count <= 3)
+            if (L.Count<=3)
             {
                 for (int i = 0; i < L.Count; i++)
                 {
@@ -166,6 +166,7 @@ public class MainSolver : SolveAgent
             }
             maxEvaluation = Math.Max(maxEvaluation, minEvaluationUp);
         }
+        //ロスカット
         if (maxEvaluation >= minEvaluation)
         {
             return maxEvaluation;
@@ -273,102 +274,7 @@ public class MainSolver : SolveAgent
         //4方向の評価値の最大値を返す
         return maxEvaluation;
     }
-    //-------------------------
-    //深さ優先探索 全探索 平均と最大値
-    //-------------------------
-    public double DepthFirstSearch(GameField field, int deep)
-    {
-        deep++;
 
-        //4方向に動かした場合
-        GameField fieldUp = new GameField(field);
-        GameField fieldDown = new GameField(field);
-        GameField fieldRight = new GameField(field);
-        GameField fieldLeft = new GameField(field);
-
-        //4個ランダムで譜面置く、一度だけ4, それ以外は2
-        int Up = 0;
-        double Evaluation_Up = double.PositiveInfinity;
-        if (fieldUp.isValidSlide("Up"))
-        { 
-            fieldUp.slide("Up");
-            List<Tuple<int, int>> L = putPiece(fieldUp);
-            for (int i = 0; i < L.Count; i++)
-            {
-                int R = rand.Next(1, 10);
-                if (R > 7) Evaluation_Up = Math.Min(Evaluation_Up, DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 4), deep));
-                else Evaluation_Up = Math.Min(Evaluation_Up, DepthFirstSearch(fieldUp.putNewPieceAt(L[i], 2), deep));
-            }
-        }
-        else
-        {
-            Evaluation_Up = 0;
-        }
-        int Down = 0;
-        double Evaluation_Down = double.PositiveInfinity;
-        if (fieldDown.isValidSlide("Down"))
-        {
-            fieldDown.slide("Down");
-            List<Tuple<int, int>> L = putPiece(fieldDown);
-            for (int i = 0; i < L.Count; i++)
-            {
-                int R = rand.Next(1, 10);
-                if (R > 7) Evaluation_Down = Math.Min(Evaluation_Down, DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 4), deep));
-                else Evaluation_Down = Math.Min(Evaluation_Down, DepthFirstSearch(fieldDown.putNewPieceAt(L[i], 2), deep));
-            }
-        }
-        else
-        {
-            Evaluation_Down = 0;
-        }
-
-        int Right = 0;
-        double Evaluation_Right = double.PositiveInfinity;
-        if (fieldRight.isValidSlide("Right"))
-        {
-            fieldRight.slide("Right");
-            List<Tuple<int, int>> L = putPiece(fieldRight);
-            for (int i = 0; i < L.Count; i++)
-            {
-                int R = rand.Next(1, 10);
-                if (R > 7) Evaluation_Right = Math.Min(Evaluation_Right, DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 4), deep));
-                else Evaluation_Right = Math.Min(Evaluation_Right, DepthFirstSearch(fieldRight.putNewPieceAt(L[i], 2), deep));
-            }
-            //if (L.Count != 0) Evaluation_Right = Right / L.Count;
-        }
-        else
-        {
-            Evaluation_Right = 0;
-        }
-
-        int Left = 0;
-        double Evaluation_Left = double.PositiveInfinity;
-        if (fieldLeft.isValidSlide("Left"))
-        {
-            fieldLeft.slide("Left");
-            List<Tuple<int, int>> L = putPiece(fieldLeft);
-            for (int i = 0; i < L.Count; i++)
-            {
-                int R = rand.Next(1, 10);
-                if (R > 7) Evaluation_Left = Math.Min(Evaluation_Left, DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 4), deep));
-                else Evaluation_Left = Math.Min(Evaluation_Left, DepthFirstSearch(fieldLeft.putNewPieceAt(L[i], 2), deep));
-            }
-            //if (L.Count != 0) Evaluation_Left = Left / L.Count;
-        }
-        else
-        {
-            Evaluation_Left = 0;
-        }
-
-        if (deep == 5   )
-        {
-            return Evaluation(field);
-        }
-        
-        //if (n == 0) return 0;
-        //4方向の評価値の平均の最大値を返す
-        return Math.Max(Math.Max(Evaluation_Up, Evaluation_Down), Math.Max(Evaluation_Right, Evaluation_Left));
-    }
     //-------------------------
     //ピースを置けるマスをランダムに4つ返す
     //-------------------------
@@ -388,80 +294,30 @@ public class MainSolver : SolveAgent
             }
         }
         //Lをランダムして最初の4つを返す
-        if (L.Count <= 5) return L;
+        if (L.Count <= 6) return L;
         else
         {
             List<Tuple<int, int>> M = L.OrderBy(i => Guid.NewGuid()).ToList();
-            return M.GetRange(0, 5);
+            return M.GetRange(0, 6);
         }
-        //return L;
     }
+
     //-------------------------
     //評価関数---盤面を評価
     //-------------------------
-    public double Evaluation(GameField field , String test = "main")
+    public double Evaluation(GameField field)
     {
-        int[,] Piece_Weight =
-        {
-            {8192, 16384, 32768, 65536},
-            {4096, 2048, 1024, 512},
-            {32, 64, 128, 256},
-            {16, 8, 4, 2},     
-        };
-        double FieldWight = 0;
         double Piece = 0;
         double Score = 0;
         double NextPiece = 0;
-        double NonePiece = 0;
-        int CanMove = 0;
-        double CanMergePiece = 0;
-        double NextSpacePiece = 0;
-        double MaxValue = 0;
-
-        MaxValue = field.maxpiece;
-
-        //動ける回数
-        if (field.isValidSlide("Up")) CanMove++;
-        if (field.isValidSlide("Down")) CanMove++;
-        if (field.isValidSlide("Right")) CanMove++;
-        if (field.isValidSlide("Left")) CanMove++;
-
-        double PieceTF = 0;
 
         for (int i=0; i<4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
                 Tuple<int, int> P = new Tuple<int, int>(i, j);
-                //Piece = Math.Log(field[P]) * 4;
-                //Piece += Math.Pow(field[P], 2);
-                Piece += Math.Pow(field[P], 3); 
-                //FieldWight += field[P] * Piece_Weight[i,j];
-
-
-                if (field[P] == 2 || field[P] == 4)
-                {
-                    PieceTF--;
-                }
-
-                if (field[P] != 0)
-                {
-                    //Piece += Math.Log(field[P], 2);
-
-                    Tuple<int, int> toP_1 = new Tuple<int, int>(i + 1, j);
-                    Tuple<int, int> toP_2 = new Tuple<int, int>(i, j + 1);
-                    Tuple<int, int> toP_3 = new Tuple<int, int>(i, j - 1);
-                    Tuple<int, int> toP_4 = new Tuple<int, int>(i - 1, j);
-                    if(field.isValidPosition(toP_1) && field[toP_1]==0) NextSpacePiece += (1 / field[P]) * 4096;
-                    if(field.isValidPosition(toP_2) && field[toP_2]==0) NextSpacePiece += (1 / field[P]) * 4096;
-                    if(field.isValidPosition(toP_3) && field[toP_3]==0) NextSpacePiece += (1 / field[P]) * 4096;
-                    if(field.isValidPosition(toP_4) && field[toP_4]==0) NextSpacePiece += (1 / field[P]) * 4096;
-                }
-                else
-                {
-                    NonePiece++;
-                    //Piece += Math.Pow(Math.Log(field[P], 2), 3);
-                }
+                //それぞれのピースの2乗の和を計算
+                Piece += Math.Pow(field[P], 2);
 
                 //隣接するマスの値の差の合計求める
                 if (field[P] != 0)
@@ -487,111 +343,9 @@ public class MainSolver : SolveAgent
                         }
                     }
                 }
-                if (field[P] != 0)
-                {
-                    for (int k = 1; k < 4; k++)
-                    {
-                        Tuple<int, int> toP = new Tuple<int, int>(i + k, j);
-                        if (!field.isValidPosition(toP)) break;
-                        if (field[toP] == field[P])
-                        {
-                            CanMergePiece += Math.Pow(field[P], 2);
-                            break;
-                        }
-                    }
-                    for (int k = 1; k < 4; k++)
-                    {
-                        Tuple<int, int> toP = new Tuple<int, int>(i, j + k);
-                        if (!field.isValidPosition(toP)) break;
-                        if (field[toP] == field[P])
-                        {
-                            CanMergePiece += Math.Pow(field[P], 2);
-                            break;
-                        }
-                    }
-                }
-                
-                
-                
-
             }
         }
-        double monotonicity = 0;
-        double[] mono = new double[4] {0,0,0,0};
-        for (int i = 0; i < 4; i++)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                Tuple<int, int> P3 = new Tuple<int, int>(i, k);
-                Tuple<int, int> P4 = new Tuple<int, int>(i, k+1);
-                double valueP3 = field[P3];
-                double valueP4 = field[P4];
-                if (valueP3 == 0) valueP3 = 1;
-                if (valueP4 == 0) valueP4 = 1;
-                if (valueP3 == valueP4)
-                {
-                    continue;
-                }
-                else if(valueP3 > valueP4)
-                {
-                    mono[2] += Math.Log(valueP4, 2) - Math.Log(valueP3, 2);
-                }
-                else
-                {
-                    mono[3] += Math.Log(valueP3, 2) - Math.Log(valueP4, 2);
-                }
-            }
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                Tuple<int, int> P3 = new Tuple<int, int>(k, i);
-                Tuple<int, int> P4 = new Tuple<int, int>(k + 1, i);
-                double valueP3 = field[P3];
-                double valueP4 = field[P4];
-                if (valueP3 == 0) valueP3 = 1;
-                if (valueP4 == 0) valueP4 = 1;
-                if (valueP3 == valueP4)
-                {
-                    continue;
-                }
-                else if (valueP3 > valueP4)
-                {
-                    mono[0] += Math.Log(valueP4, 2) - Math.Log(valueP3, 2);
-                }
-                else
-                {
-                    mono[1] += Math.Log(valueP3, 2) - Math.Log(valueP4, 2);
-                }
-            }
-            monotonicity = Math.Max(mono[0], mono[1]) + Math.Max(mono[2], mono[3]);
-        }
-
-        //Score = NonePiece * 128 + Piece + CanMove*256 + CanMergePiece;
-        //Score = Piece - NextPiece/2;
-        //Score = Piece - NextPiece;
-        double tmp = 0;
-        if (NonePiece == 0)
-        {
-            tmp = 0;
-        }else
-        {
-            tmp = Math.Log(NonePiece) * 4.5;
-        }
-        //Console.WriteLine(mono[0]);
-        //Score = Math.Log(MaxValue, 2) - NextPiece*0.1 + tmp + monotonicity;
-        //Score = Piece - NextPiece;
-        //Score = NonePiece +  MaxValue + FieldWight -  NextPiece + monotonicity;
-        if(test == "test")
-        {
-            Console.WriteLine("NextPiece:{0}", NextPiece);
-            Console.WriteLine("monotonicity:{0}", monotonicity);
-            Console.WriteLine("NonePiece:{0}", NonePiece);
-            Console.WriteLine("MaxValue:{0}", MaxValue);
-        }
-        Score = Piece + (-NextPiece * 0.1)  + tmp + Math.Log(MaxValue, 2);
-        //Score = Piece;
+        Score = Piece + (-NextPiece / 2) ;
         return Score;
     }
 }

@@ -87,6 +87,9 @@ public partial class GameController
                 history.RemoveLast();
                 history.AddLast(l.putNewPieceAt(placement.Item1, placement.Item2));
                 if(history.Last.Value.checkmate()){
+                    //’Ç‰Á
+                    File.AppendAllText(@"C:\Users\ngnls\Desktop\output.txt", history.Last.Value.maxpiece.ToString() + "\n");
+                    
                     streamer(String.Format("[Lose\t] {0} lost at turn {1}", solver.GetType().Name, t));
                     streamer(history.Last.Value.ToString());
                     return;

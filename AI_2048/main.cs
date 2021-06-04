@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -13,18 +14,25 @@ public static class Program
 
         Tuple<int, int> fieldsize = new Tuple<int, int>(4, 4);
 
-        GameController cont = new GameController(fieldsize, rand_seed);
-        int n = Tst(10);
-        cont.Run(typeof(MainSolver), log_path: log_path);
+        //GameController cont = new GameController(fieldsize, rand_seed);
+        //cont.Run(typeof(MainSolver), log_path: log_path);
+
+        for (int i = 0; i < 10; i++)
+        {
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                GameController cont = new GameController(fieldsize, rand_seed);
+                cont.Run(typeof(MainSolver), log_path: log_path);
+            }));
+            thread.Start();
+        }
+        File.AppendAllText(@"C:\Users\ngnls\Desktop\output.txt", "--------------------------\n");
+
     }
     public static int Tst(int n)
     {
         Console.WriteLine("n{0}", n);
-        int k = n;
-        k += 1;
-        Console.WriteLine("k{0}", k);
-        Console.WriteLine("n{0}", n);
-
+        n += 100;
         return 0;
     }
 }
