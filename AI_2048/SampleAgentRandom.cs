@@ -28,7 +28,8 @@ public class MainSolver : SolveAgent
     {
         GameField latest = history[history.Count - 1];
         GameField field =  new GameField(latest);
-        Console.WriteLine(Evaluation(field));
+
+        Console.WriteLine(Evaluation(field, "test"));
 
         String s = FindSlide(field);
         //4方向に移動可能かどうか判断
@@ -108,7 +109,7 @@ public class MainSolver : SolveAgent
 
 
     //--------------------------------------
-    //深さ優先探索 max-min探索 alpha-beta探索
+    //深さ優先探索 minimax探索 alpha-beta探索
     //-------------------------------------
     public double AplphaBetaSerch(GameField field, int deep, double maxEvaluation, double minEvaluation)//0 , 無限
     {
@@ -116,7 +117,7 @@ public class MainSolver : SolveAgent
         {
             return double.NegativeInfinity;
         }
-        if (deep == 5)
+        if (deep == 4)
         {
             return Evaluation(field);
         }
@@ -135,7 +136,7 @@ public class MainSolver : SolveAgent
         double minEvaluationLeft = minEvaluation;
 
         //4個ランダムで譜面置く、一度だけ4, それ以外は2
-
+        //上方向に移動
         if (fieldUp.isValidSlide("Up"))
         {
             fieldUp.slide("Up");
@@ -157,7 +158,7 @@ public class MainSolver : SolveAgent
                 for (int i = 0; i < L.Count; i++)
                 {
                     int R = rand.Next(1, 10);
-                    if (R > 7) minEvaluationUp = Math.Min(minEvaluationUp, AplphaBetaSerch(fieldUp.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationUp));
+                    if (R > 4) minEvaluationUp = Math.Min(minEvaluationUp, AplphaBetaSerch(fieldUp.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationUp));
                     else minEvaluationUp = Math.Min(minEvaluationUp, AplphaBetaSerch(fieldUp.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationUp));
                     //ロスカット
                     if (maxEvaluation >= minEvaluationUp) break;
@@ -169,7 +170,7 @@ public class MainSolver : SolveAgent
         {
             return maxEvaluation;
         }
-
+        //下方向に移動
         if (fieldDown.isValidSlide("Down"))
         {
             fieldDown.slide("Down");
@@ -191,7 +192,7 @@ public class MainSolver : SolveAgent
                 for (int i = 0; i < L.Count; i++)
                 {
                     int R = rand.Next(1, 10);
-                    if (R > 7) minEvaluationDown = Math.Min(minEvaluationDown, AplphaBetaSerch(fieldDown.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationDown));
+                    if (R > 4) minEvaluationDown = Math.Min(minEvaluationDown, AplphaBetaSerch(fieldDown.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationDown));
                     else minEvaluationDown = Math.Min(minEvaluationDown, AplphaBetaSerch(fieldDown.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationDown));
                     //ロスカット
                     if (maxEvaluation >= minEvaluationDown) break;
@@ -203,7 +204,7 @@ public class MainSolver : SolveAgent
         {
             return maxEvaluation;
         }
-
+        //右方向に移動
         if (fieldRight.isValidSlide("Right"))
         {
             fieldRight.slide("Right");
@@ -225,9 +226,8 @@ public class MainSolver : SolveAgent
                 for (int i = 0; i < L.Count; i++)
                 {
                     int R = rand.Next(1, 10);
-                    if (R > 7) minEvaluationRight = Math.Min(minEvaluationRight, AplphaBetaSerch(fieldRight.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationRight));
+                    if (R > 4) minEvaluationRight = Math.Min(minEvaluationRight, AplphaBetaSerch(fieldRight.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationRight));
                     else minEvaluationRight = Math.Min(minEvaluationRight, AplphaBetaSerch(fieldRight.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationRight));
-                    //ロスカット
                     if (maxEvaluation >= minEvaluationRight) break;
                 }
             }
@@ -237,7 +237,7 @@ public class MainSolver : SolveAgent
         {
             return maxEvaluation;
         }
-
+        //左方向に移動
         if (fieldLeft.isValidSlide("Left"))
         {
             fieldLeft.slide("Left");
@@ -259,7 +259,7 @@ public class MainSolver : SolveAgent
                 for (int i = 0; i < L.Count; i++)
                 {
                     int R = rand.Next(1, 10);
-                    if (R > 7) minEvaluationLeft = Math.Min(minEvaluationLeft, AplphaBetaSerch(fieldLeft.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationLeft));
+                    if (R > 4) minEvaluationLeft = Math.Min(minEvaluationLeft, AplphaBetaSerch(fieldLeft.putNewPieceAt(L[i], 4), deep, maxEvaluation, minEvaluationLeft));
                     else minEvaluationLeft = Math.Min(minEvaluationLeft, AplphaBetaSerch(fieldLeft.putNewPieceAt(L[i], 2), deep, maxEvaluation, minEvaluationLeft));
                     if (maxEvaluation >= minEvaluationLeft) break;
                 }
@@ -278,11 +278,8 @@ public class MainSolver : SolveAgent
     //-------------------------
     public double DepthFirstSearch(GameField field, int deep)
     {
-        if(deep == 2)
-        {
-            return Evaluation(field);
-        }
         deep++;
+
         //4方向に動かした場合
         GameField fieldUp = new GameField(field);
         GameField fieldDown = new GameField(field);
@@ -362,6 +359,12 @@ public class MainSolver : SolveAgent
         {
             Evaluation_Left = 0;
         }
+
+        if (deep == 5   )
+        {
+            return Evaluation(field);
+        }
+        
         //if (n == 0) return 0;
         //4方向の評価値の平均の最大値を返す
         return Math.Max(Math.Max(Evaluation_Up, Evaluation_Down), Math.Max(Evaluation_Right, Evaluation_Left));
@@ -396,20 +399,20 @@ public class MainSolver : SolveAgent
     //-------------------------
     //評価関数---盤面を評価
     //-------------------------
-    public double Evaluation(GameField field)
+    public double Evaluation(GameField field , String test = "main")
     {
         int[,] Piece_Weight =
         {
             {8192, 16384, 32768, 65536},
             {4096, 2048, 1024, 512},
             {32, 64, 128, 256},
-            {16, 8, 4, 2},
+            {16, 8, 4, 2},     
         };
         double FieldWight = 0;
         double Piece = 0;
         double Score = 0;
-        int NextPiece = 0;
-        int NonePiece = 0;
+        double NextPiece = 0;
+        double NonePiece = 0;
         int CanMove = 0;
         double CanMergePiece = 0;
         double NextSpacePiece = 0;
@@ -431,9 +434,10 @@ public class MainSolver : SolveAgent
             {
                 Tuple<int, int> P = new Tuple<int, int>(i, j);
                 //Piece = Math.Log(field[P]) * 4;
-                Piece += Math.Pow(field[P], 2);
+                //Piece += Math.Pow(field[P], 2);
+                Piece += Math.Pow(field[P], 3); 
                 //FieldWight += field[P] * Piece_Weight[i,j];
-                //Piece += field[P];
+
 
                 if (field[P] == 2 || field[P] == 4)
                 {
@@ -442,6 +446,8 @@ public class MainSolver : SolveAgent
 
                 if (field[P] != 0)
                 {
+                    //Piece += Math.Log(field[P], 2);
+
                     Tuple<int, int> toP_1 = new Tuple<int, int>(i + 1, j);
                     Tuple<int, int> toP_2 = new Tuple<int, int>(i, j + 1);
                     Tuple<int, int> toP_3 = new Tuple<int, int>(i, j - 1);
@@ -454,6 +460,7 @@ public class MainSolver : SolveAgent
                 else
                 {
                     NonePiece++;
+                    //Piece += Math.Pow(Math.Log(field[P], 2), 3);
                 }
 
                 //隣接するマスの値の差の合計求める
@@ -465,7 +472,7 @@ public class MainSolver : SolveAgent
                         if (!field.isValidPosition(toP)) break;
                         if (field[toP] != 0)
                         {
-                            NextPiece += Math.Abs(field[P] - field[toP])/4;
+                            NextPiece += Math.Abs(Math.Log(field[P], 2) - Math.Log(field[toP], 2));
                             break;
                         }
                     }
@@ -475,7 +482,7 @@ public class MainSolver : SolveAgent
                         if (!field.isValidPosition(toP)) break;
                         if (field[toP] != 0)
                         {
-                            NextPiece += Math.Abs(field[P] - field[toP])/4;
+                            NextPiece += Math.Abs( Math.Log(field[P], 2) - Math.Log(field[toP], 2));
                             break;
                         }
                     }
@@ -510,7 +517,7 @@ public class MainSolver : SolveAgent
             }
         }
         double monotonicity = 0;
-        double[] mono = new double[4];
+        double[] mono = new double[4] {0,0,0,0};
         for (int i = 0; i < 4; i++)
         {
             for (int k = 0; k < 3; k++)
@@ -558,7 +565,7 @@ public class MainSolver : SolveAgent
                     mono[1] += Math.Log(valueP3, 2) - Math.Log(valueP4, 2);
                 }
             }
-            monotonicity = Math.Max(Math.Max(mono[0], mono[1]), Math.Max(mono[2], mono[3]));
+            monotonicity = Math.Max(mono[0], mono[1]) + Math.Max(mono[2], mono[3]);
         }
 
         //Score = NonePiece * 128 + Piece + CanMove*256 + CanMergePiece;
@@ -570,12 +577,21 @@ public class MainSolver : SolveAgent
             tmp = 0;
         }else
         {
-            tmp = Math.Log(NonePiece) * 2.7;
+            tmp = Math.Log(NonePiece) * 4.5;
         }
         //Console.WriteLine(mono[0]);
         //Score = Math.Log(MaxValue, 2) - NextPiece*0.1 + tmp + monotonicity;
-        Score = Piece - NextPiece + NextSpacePiece;
+        //Score = Piece - NextPiece;
         //Score = NonePiece +  MaxValue + FieldWight -  NextPiece + monotonicity;
+        if(test == "test")
+        {
+            Console.WriteLine("NextPiece:{0}", NextPiece);
+            Console.WriteLine("monotonicity:{0}", monotonicity);
+            Console.WriteLine("NonePiece:{0}", NonePiece);
+            Console.WriteLine("MaxValue:{0}", MaxValue);
+        }
+        Score = Piece + (-NextPiece * 0.1)  + tmp + Math.Log(MaxValue, 2);
+        //Score = Piece;
         return Score;
     }
 }
